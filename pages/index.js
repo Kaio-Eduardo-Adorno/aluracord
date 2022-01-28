@@ -1,76 +1,16 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { Box, Button, Text, TextField, Image } from '@skynexui/components';
 import appConfig from '../config.json';
 
-function GlobalStyle() {
-  return (
-    <style global jsx>{`
-      @font-face {
-        font-family: 'fleshandbloodmedium';
-        src: url('/fonts/fleshandblood/fleshandblood-mva5x-webfont.woff2') format('woff2'),
-             url('/fonts/fleshandblood/fleshandblood-mva5x-webfont.woff') format('woff');
-        font-weight: normal;
-        font-style: normal;
-        src: url("/fonts/Fleshandblood/Fleshandblood-MVA5x.ttf");
-      }
-
-      @font-face {
-        font-family: "liberation-serif";
-        src: url("https://use.typekit.net/af/e76aaf/000000000000000077359520/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3") format("woff2"),url("https://use.typekit.net/af/e76aaf/000000000000000077359520/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3") format("woff"),url("https://use.typekit.net/af/e76aaf/000000000000000077359520/30/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3") format("opentype");
-        font-display: auto;
-        font-style:normal;
-        font-weight:400;
-      }
-      
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        list-style: none;
-      }
-      body {
-        font-family: 'liberation-serif', 'Open Sans', sans-serif;
-      }
-      /* App fit Height */ 
-      html, body, #__next {
-        min-height: 100vh;
-        display: flex;
-        flex: 1;
-      }
-      #__next {
-        flex: 1;
-      }
-      #__next > * {
-        flex: 1;
-      }
-      /* ./App fit Height */ 
-    `}</style>
-  );
-}
-
-function Titulo(props) {
-  const Tag = props.tag || 'h1';
-  return (
-    <>
-      <Tag>{props.children}</Tag>
-      <style jsx>{`
-            ${Tag} {
-                color: ${appConfig.theme.colors.neutrals['000']};
-                font-family: 'fleshandblood';
-                font-size: 24px;
-                font-weight: 600;
-            }
-            `}</style>
-    </>
-  );
-}
-
 export default function PaginaInicial() {
   const [username, setUsername] = useState('kaio-eduardo-adorno');
+  const [image, setImage] = useState(`https://github.com/${username}.png`);
+  const [userNotFound, setUserNotFound] = useState(false);
+  const router = useRouter();
 
   return (
     <>
-      <GlobalStyle />
       <Box
         styleSheet={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -97,16 +37,30 @@ export default function PaginaInicial() {
           {/* Formulário */}
           <Box
             as="form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              router.push('/chat');
+            }}
             styleSheet={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px',
             }}
           >
-            <Titulo tag="h2">Welcome good hunter!</Titulo>
+            <Text variant="heading2" styleSheet={{
+              color: appConfig.theme.colors.neutrals['000'],
+              fontFamily: 'fleshandblood',
+              fontSize: '24px',
+              fontWeight: 600,
+            }}>Welcome good hunter!</Text>
             <Text variant="body3" styleSheet={{ marginBottom: '32px', fontFamily: 'liberation-serif', color: appConfig.theme.colors.neutrals[300] }}>
               {appConfig.name}
             </Text>
 
+            {userNotFound ? (
+              <Text variant="body4" styleSheet={{ marginBottom: '1px', fontFamily: 'liberation-serif', color: appConfig.theme.colors.primary[300] }}>
+                *Nome de usuario inválido!
+              </Text>
+            ) : null}
             <TextField
               fullWidth
               textFieldColors={{
@@ -120,6 +74,8 @@ export default function PaginaInicial() {
               value={username}
               onChange={(event) => {
                 setUsername(event.target.value);
+                setImage(`https://github.com/${event.target.value}.png`);
+                setUserNotFound(false);
               }}
             />
             <Button
@@ -158,7 +114,11 @@ export default function PaginaInicial() {
                 borderRadius: '50%',
                 marginBottom: '16px',
               }}
-              src={`https://github.com/${username}.png`}
+              src={image}
+              onError={() => {
+                setImage('https://imgshare.io/images/2022/01/27/user-not-found.jpg');
+                setUserNotFound(true);
+              }}
             />
             <Text
               variant="body4"
