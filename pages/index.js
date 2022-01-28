@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Box, Button, Text, TextField, Image } from '@skynexui/components';
 import appConfig from '../config.json';
 
@@ -65,7 +66,7 @@ function Titulo(props) {
 }
 
 export default function PaginaInicial() {
-  const username = 'kaio-eduardo-adorno';
+  const [username, setUsername] = useState('kaio-eduardo-adorno');
 
   return (
     <>
@@ -115,6 +116,10 @@ export default function PaginaInicial() {
                   mainColorHighlight: appConfig.theme.colors.primary[500],
                   backgroundColor: appConfig.theme.colors.neutrals[800],
                 },
+              }}
+              value={username}
+              onChange={(event) => {
+                setUsername(event.target.value);
               }}
             />
             <Button
