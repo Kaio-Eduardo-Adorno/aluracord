@@ -39,7 +39,9 @@ export default function PaginaInicial() {
             as="form"
             onSubmit={(event) => {
               event.preventDefault();
-              router.push('/chat');
+              if (!userNotFound) {
+                router.push(`/chat?username=${username}`);
+              }
             }}
             styleSheet={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',

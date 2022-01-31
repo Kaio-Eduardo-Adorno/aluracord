@@ -1,5 +1,6 @@
 import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import appConfig from '../config.json';
 import { createClient } from '@supabase/supabase-js'
 
@@ -17,6 +18,8 @@ const listenNewMessages = (newMessage) => {
 export default function ChatPage() {
   const [messageList, setMessageList] = useState([]);
   const [message, setMessage] = useState([]);
+  const router = useRouter();
+  const loggedUser = router.query.username;
 
   useEffect(() => {
     supabase
@@ -37,7 +40,7 @@ export default function ChatPage() {
 
   const handleNewMessage = (newMessage) => {
     const messageInfo = {
-      from: 'kaio-eduardo-adorno',
+      from: loggedUser,
       content: newMessage,
     };
 
