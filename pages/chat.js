@@ -1,18 +1,52 @@
 import { Box, Text, TextField, Image, Button } from '@skynexui/components';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import appConfig from '../config.json';
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+const listenNewMessages = (newMessage) => {
+  return supabase
+    .from('messages')
+    .on('INSERT', (incomingMessage) => {
+      newMessage(incomingMessage.new);
+    })
+    .subscribe();
+};
 
 export default function ChatPage() {
   const [messageList, setMessageList] = useState([]);
   const [message, setMessage] = useState([]);
 
+  useEffect(() => {
+    supabase
+      .from('messages')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        setMessageList(data);
+      });
+
+    listenNewMessages((newMessage) => {
+      setMessageList((activeMessageList) => {
+        return [newMessage, ...activeMessageList]
+      });
+    });
+
+  }, [])
+
   const handleNewMessage = (newMessage) => {
     const messageInfo = {
-      id: messageList.length,
-      from: 'Kaio',
+      from: 'kaio-eduardo-adorno',
       content: newMessage,
     };
-    setMessageList([messageInfo, ...messageList]);
+
+    supabase
+      .from('messages')
+      .insert([messageInfo])
+      .then(() => {
+      })
+
     setMessage('');
   }
 
@@ -114,7 +148,6 @@ function Header() {
 }
 
 function MessageList(props) {
-  console.log('MessageList', props['messages']);
   return (
     <Box
       tag='ul'
@@ -155,7 +188,7 @@ function MessageList(props) {
                   display: 'inline-block',
                   marginRight: '8px',
                 }}
-                src={`https://github.com/kaio-eduardo-adorno.png`}
+                src={`https://github.com/${message.from}.png`}
               />
               <Text tag='strong'>
                 {message.from}
@@ -168,7 +201,8 @@ function MessageList(props) {
                 }}
                 tag='span'
               >
-                {`${new Date().toLocaleDateString('en-GB')} às ${new Date().toLocaleTimeString('it-IT')}`}
+                {`${new Date(message.created_at).toLocaleDateString('en-GB')} 
+                às ${new Date(message.created_at).toLocaleTimeString('it-IT')}`}
               </Text>
             </Box>
             {message.content}
